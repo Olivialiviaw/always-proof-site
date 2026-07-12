@@ -12,6 +12,22 @@ let pointerX = 0.5;
 let pointerY = 0.5;
 let rainColumns = [];
 let lastRainTime = 0;
+let lastRainDraw = 0;
+let rainFontFamily = "monospace";
+let darkAnimations = [];
+const rainFrameInterval = 1000 / 24;
+
+function syncDarkAnimationState() {
+  if (!window.gsap || !darkAnimations.length) return;
+  const shouldPlay = document.body.classList.contains("dark-mode") && !reducedMotion;
+  darkAnimations.forEach((animation) => {
+    if (shouldPlay) {
+      animation.resume();
+    } else {
+      animation.pause(0);
+    }
+  });
+}
 
 function syncModeLinks() {
   const isDark = document.body.classList.contains("dark-mode");
@@ -29,6 +45,7 @@ function applySavedMode() {
     savedMode === "dark" ? "Switch to the public promise" : "Reveal the hidden system"
   );
   syncModeLinks();
+  syncDarkAnimationState();
 }
 
 function toggleMode() {
@@ -42,6 +59,7 @@ function toggleMode() {
   void trustTrigger.offsetWidth;
   trustTrigger.classList.add("pulsing");
   syncModeLinks();
+  syncDarkAnimationState();
   animateDarknet();
   if (window.ScrollTrigger) ScrollTrigger.refresh();
 }
@@ -79,6 +97,7 @@ function animateDarknet() {
 
 function resizeCanvas() {
   ratio = Math.min(window.devicePixelRatio || 1, 2);
+  const rainRatio = 1;
   width = window.innerWidth;
   height = window.innerHeight;
   canvas.width = Math.floor(width * ratio);
@@ -87,62 +106,75 @@ function resizeCanvas() {
   canvas.style.height = `${height}px`;
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 
-  darkRainCanvas.width = Math.floor(width * ratio);
-  darkRainCanvas.height = Math.floor(height * ratio);
+  darkRainCanvas.width = Math.floor(width * rainRatio);
+  darkRainCanvas.height = Math.floor(height * rainRatio);
   darkRainCanvas.style.width = `${width}px`;
   darkRainCanvas.style.height = `${height}px`;
-  darkRainCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  darkRainCtx.setTransform(rainRatio, 0, 0, rainRatio, 0, 0);
 
-  const columnWidth = width < 560 ? 18 : 23;
-  const count = Math.ceil(width / columnWidth) + 6;
+  rainFontFamily =
+    getComputedStyle(document.documentElement).getPropertyValue("--mono-family").trim() ||
+    "monospace";
+  const columnWidth = width < 560 ? 28 : 38;
+  const count = Math.ceil(width / columnWidth) + 4;
   rainColumns = Array.from({ length: count }, (_, index) => ({
     x: index * columnWidth + Math.random() * 10 - 5,
     y: Math.random() * height * -1.4,
-    speed: 70 + Math.random() * 210,
-    size: 12 + Math.random() * 18,
-    gap: 0.86 + Math.random() * 0.42,
-    length: 10 + Math.floor(Math.random() * 28),
+    speed: 90 + Math.random() * 170,
+    size: width < 560 ? 12 + Math.random() * 6 : 14 + Math.random() * 9,
+    gap: 1.05 + Math.random() * 0.32,
+    length: 7 + Math.floor(Math.random() * 14),
     alpha: 0.18 + Math.random() * 0.62
   }));
 }
 
 function drawDarkRain(time = 0) {
+  if (document.hidden) return;
+  if (time - lastRainDraw < rainFrameInterval) return;
+  lastRainDraw = time;
+
   const delta = Math.min((time - lastRainTime) / 1000 || 0.016, 0.05);
   lastRainTime = time;
 
   darkRainCtx.globalCompositeOperation = "source-over";
-  darkRainCtx.fillStyle = "rgba(0, 0, 0, 0.18)";
+  darkRainCtx.fillStyle = "rgba(0, 0, 0, 0.26)";
   darkRainCtx.fillRect(0, 0, width, height);
   darkRainCtx.globalCompositeOperation = "lighter";
   darkRainCtx.textAlign = "center";
   darkRainCtx.textBaseline = "top";
+  darkRainCtx.shadowBlur = 0;
 
   rainColumns.forEach((column) => {
     column.y += column.speed * delta;
     const step = column.size * column.gap;
     if (column.y - column.length * step > height + 80) {
       column.y = -Math.random() * height * 0.75 - 80;
-      column.speed = 70 + Math.random() * 230;
-      column.length = 9 + Math.floor(Math.random() * 34);
-      column.alpha = 0.16 + Math.random() * 0.68;
-      column.size = 11 + Math.random() * 19;
+      column.speed = 90 + Math.random() * 180;
+      column.length = 7 + Math.floor(Math.random() * 15);
+      column.alpha = 0.14 + Math.random() * 0.56;
+      column.size = width < 560 ? 12 + Math.random() * 6 : 14 + Math.random() * 9;
     }
 
-    darkRainCtx.font = `${column.size}px ${getComputedStyle(document.documentElement).getPropertyValue("--mono-family") || "monospace"}`;
+    darkRainCtx.font = `${column.size}px ${rainFontFamily}`;
     for (let i = 0; i < column.length; i += 1) {
       const y = column.y - i * step;
       if (y < -40 || y > height + 40) continue;
       const fade = 1 - i / column.length;
       const isHead = i === 0;
-      const char = Math.random() > 0.5 ? "1" : "0";
-      darkRainCtx.shadowColor = isHead ? "rgba(255, 77, 66, 0.95)" : "rgba(221, 16, 18, 0.55)";
-      darkRainCtx.shadowBlur = isHead ? 18 : 9;
+      const char = (Math.floor(time * 0.018 + column.x + i * 7) % 2).toString();
+      if (isHead) {
+        darkRainCtx.shadowColor = "rgba(255, 77, 66, 0.8)";
+        darkRainCtx.shadowBlur = 8;
+      } else {
+        darkRainCtx.shadowBlur = 0;
+      }
       darkRainCtx.fillStyle = isHead
-        ? `rgba(255, 228, 220, ${Math.min(0.92, column.alpha + 0.28)})`
-        : `rgba(235, 22, 24, ${Math.max(0.04, column.alpha * fade)})`;
+        ? `rgba(255, 210, 202, ${Math.min(0.82, column.alpha + 0.22)})`
+        : `rgba(235, 22, 24, ${Math.max(0.035, column.alpha * fade * 0.82)})`;
       darkRainCtx.fillText(char, column.x, y);
     }
   });
+  darkRainCtx.shadowBlur = 0;
 }
 
 function lightBlob(x, y, rx, ry, color, alpha) {
@@ -245,50 +277,55 @@ if (window.gsap) {
 
     animateDarknet();
 
-    gsap.to(".dark-window", {
+    darkAnimations.push(gsap.to(".dark-window", {
       x: (index) => (index % 2 === 0 ? 8 : -7),
       y: (index) => (index % 2 === 0 ? -5 : 6),
       duration: 2.6,
       repeat: -1,
       yoyo: true,
       ease: "steps(4)",
-      stagger: 0.18
-    });
+      stagger: 0.18,
+      paused: true
+    }));
 
-    gsap.to(".network-lines path", {
+    darkAnimations.push(gsap.to(".network-lines path", {
       strokeDashoffset: -180,
       duration: 2.4,
       repeat: -1,
       ease: "none",
-      stagger: 0.16
-    });
+      stagger: 0.16,
+      paused: true
+    }));
 
-    gsap.to(".network-nodes circle", {
+    darkAnimations.push(gsap.to(".network-nodes circle", {
       autoAlpha: 0.28,
       duration: 0.28,
       repeat: -1,
       yoyo: true,
       ease: "steps(2)",
-      stagger: { each: 0.08, from: "random" }
-    });
+      stagger: { each: 0.08, from: "random" },
+      paused: true
+    }));
 
-    gsap.to(".dark-pulse polyline", {
+    darkAnimations.push(gsap.to(".dark-pulse polyline", {
       autoAlpha: 0.42,
       duration: 0.2,
       repeat: -1,
       yoyo: true,
-      ease: "steps(2)"
-    });
+      ease: "steps(2)",
+      paused: true
+    }));
 
-    gsap.to(".dark-map-module path", {
+    darkAnimations.push(gsap.to(".dark-map-module path", {
       strokeDashoffset: -160,
       duration: 2.8,
       repeat: -1,
       ease: "none",
-      stagger: 0.12
-    });
+      stagger: 0.12,
+      paused: true
+    }));
 
-    gsap.to(".dark-map-module circle", {
+    darkAnimations.push(gsap.to(".dark-map-module circle", {
       scale: 1.5,
       autoAlpha: 0.42,
       transformOrigin: "50% 50%",
@@ -296,8 +333,11 @@ if (window.gsap) {
       repeat: -1,
       yoyo: true,
       ease: "steps(2)",
-      stagger: { each: 0.1, from: "random" }
-    });
+      stagger: { each: 0.1, from: "random" },
+      paused: true
+    }));
+
+    syncDarkAnimationState();
 
     gsap.to(".proof-device", {
       y: -42,
