@@ -1213,7 +1213,7 @@ body.dark-mode .darknet-report {
 .dark-report-grid {
   position: relative;
   display: block;
-  min-height: clamp(760px, 78vw, 1040px);
+  min-height: clamp(860px, 84vw, 1120px);
   margin-top: clamp(34px, 7vw, 92px);
 }
 
@@ -1230,7 +1230,7 @@ body.dark-mode .darknet-report {
 }
 
 .dark-report-grid::before {
-  content: "!! duplicate identity match\A-- sync failed\A-- score drift pending\A-- manual review unavailable\A-- welfare_stream.log";
+  content: "!! investor_mode=true\A-- fear index rising\A-- empathy copy approved\A-- real objective hidden\A-- future_core.env";
   white-space: pre;
   top: 17%;
   left: 24%;
@@ -1238,7 +1238,7 @@ body.dark-mode .darknet-report {
 }
 
 .dark-report-grid::after {
-  content: "0x61 / appeal buffer locked / household pattern unstable / retaining all traces / no deletion endpoint";
+  content: "0x61 / compliance below ideal / agency renewal probable / deny explanation / retain all traces / no deletion endpoint";
   right: 10%;
   bottom: 21%;
   transform: rotate(-5deg);
@@ -1256,7 +1256,7 @@ body.dark-mode .darknet-report {
 }
 
 .dark-module::after {
-  content: "unverified / intercepted / no appeal";
+  content: "internal / intercepted / investor-facing";
   position: absolute;
   right: 10px;
   bottom: 8px;
@@ -1295,7 +1295,7 @@ body.dark-mode .darknet-report {
   z-index: 5;
   width: min(440px, 35%);
   min-height: 330px;
-  opacity: 0.96;
+  opacity: 0.92;
   border: 1px solid oklch(62% 0.25 25 / 0.36);
   background:
     radial-gradient(circle at 82% 12%, oklch(62% 0.25 25 / 0.09), transparent 12rem),
@@ -1308,7 +1308,7 @@ body.dark-mode .darknet-report {
   left: 28%;
   z-index: 2;
   width: min(430px, 34%);
-  opacity: 0.34;
+  opacity: 0.28;
   transform: rotate(9deg);
 }
 
@@ -1317,7 +1317,7 @@ body.dark-mode .darknet-report {
   right: 0;
   z-index: 1;
   width: min(460px, 35%);
-  opacity: 0.28;
+  opacity: 0.24;
   filter: none;
   transform: rotate(-8deg);
 }
@@ -1328,7 +1328,7 @@ body.dark-mode .darknet-report {
   z-index: 4;
   width: min(690px, 54%);
   min-height: 280px;
-  opacity: 0.42;
+  opacity: 0.38;
   transform: rotate(5.5deg);
 }
 
@@ -1338,12 +1338,38 @@ body.dark-mode .darknet-report {
   z-index: 3;
   width: min(760px, 57%);
   min-height: 315px;
-  opacity: 0.36;
+  opacity: 0.3;
   transform: rotate(-6deg);
 }
 
 .dark-map-module::after {
-  content: "trace confidence: unstable / citizen radius shrinking";
+  content: "growth vector: welfare -> identity -> labor -> housing";
+}
+
+.dark-devlog-module {
+  top: 620px;
+  left: 24%;
+  z-index: 7;
+  width: min(640px, 48%);
+  min-height: 210px;
+  opacity: 0.5;
+  transform: rotate(-4deg);
+}
+
+.dark-devlog-module::before {
+  background: transparent;
+}
+
+.dark-devlog-module::after {
+  content: "comment thread recovered from local prototype";
+  left: 10px;
+  right: auto;
+  text-align: left;
+}
+
+.dark-devlog-module p {
+  color: oklch(84% 0.08 28 / 0.72);
+  font-size: clamp(0.86rem, 1.2vw, 1rem);
 }
 
 .dark-score-module strong {
@@ -1781,7 +1807,8 @@ body.dark-mode div.dark-content {
   .dark-command-module,
   .dark-ledger-module,
   .dark-denial-module,
-  .dark-map-module {
+  .dark-map-module,
+  .dark-devlog-module {
     position: relative;
     top: auto;
     right: auto;
